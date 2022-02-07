@@ -1,0 +1,68 @@
+# Default values for asp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# HA and autoscaling
+replicaCount: 1
+appName: asp
+
+# Image
+image:
+  repository: local-registry:5000/audience-segmentation-platform
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Container port
+container:
+  port: 8080
+  resources:
+    cpuBase: 100m
+    cpuMax: 1000m
+    memory: 1000Mi
+
+# Environment variables
+environmentVars:
+  - name: server.servlet.context-path
+    value: "/audiences/v1/"
+  - name: "kafka.consumer.topics.customer_segments.bootstrap-servers"
+    value: "kafka:9092"
+  - name: "kafka.consumer.topics.internal_audiences.bootstrap-servers"
+    value: "kafka:9092"
+  - name: "kafka.producer.topics.audiences.bootstrap-servers"
+    value: "kafka:9092"
+  - name: "kafka.producer.topics.members.bootstrap-servers"
+    value: "kafka:9092"
+
+# Secrets
+secrets:
+  - name: spring.data.mongodb.primary.uri
+    secretRef: asp-mongodb-creds
+    fieldName: uri
+  - name: spring.data.mongodb.secondary.uri
+    secretRef: asp-mongodb-creds
+    fieldName: uri
+
+healthCheck:
+  path: /audiences/v1/health
+  port: 8080
+  readinessDelaySeconds: 30
+  livenessDelaySeconds: 120
+  periodSeconds: 10
+
+service:
+  type: ClusterIP # ClusterIP, NodePort, LoadBalancer
+  port: 8080
+  nodePort: 30007
+
+ingress:
+  path: /audiences/v1/
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  # targetMemoryUtilizationPercentage: 80

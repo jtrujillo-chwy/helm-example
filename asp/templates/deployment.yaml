@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-deployment
+  labels:
+    app: {{ .Values.appName | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appName | quote }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName | quote }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          requests:
+            cpu: {{ .Values.container.resources.cpuBase | quote }}
+            memory: {{ .Values.container.resources.memory | quote }}
+          limits:
+            cpu: {{ .Values.container.resources.cpuMax | quote }}
+            memory: {{ .Values.container.resources.memory | quote }}
+        ports:
+          - containerPort: {{ .Values.container.port }}
+        env:
+          {{- range .Values.environmentVars }}
+          - name: {{ .name }}
+            value: {{ .value }}
+          {{- end }}
+          {{- range .Values.secrets }}
+          - name: {{ .name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .secretRef }}
+                key: {{ .fieldName }}
+          {{- end }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthCheck.path | quote }}
+            port: {{ .Values.healthCheck.port }}
+          initialDelaySeconds: {{ .Values.healthCheck.readinessDelaySeconds }}
+          periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthCheck.path | quote }}
+            port: {{ .Values.healthCheck.port }}
+          initialDelaySeconds: {{ .Values.healthCheck.livenessDelaySeconds }}
+          periodSeconds: {{ .Values.healthCheck.periodSeconds }}
