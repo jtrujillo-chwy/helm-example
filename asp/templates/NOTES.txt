@@ -1,0 +1,19 @@
+You have installed or upgraded {{ .Release.Name }}:
+- New chart version: {{ .Chart.Version }}
+- New app version: {{ .Chart.AppVersion }}
+- New k8s revision: {{ .Release.Revision }}
+
+To see revision history:
+```
+helm history {{ .Release.Name }}
+```
+
+To see current status:
+```
+helm status {{ .Release.Name }}
+```
+
+If there are issues, you can roll back with:
+```
+helm rollback {{ .Release.Name }} {{ sub .Release.Revision 1 }}
+```
