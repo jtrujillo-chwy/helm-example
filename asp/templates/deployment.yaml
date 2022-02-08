@@ -20,13 +20,13 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           requests:
-            cpu: {{ .Values.container.resources.cpuBase | quote }}
-            memory: {{ .Values.container.resources.memory | quote }}
+            cpu: {{ .Values.resources.cpuBase | quote }}
+            memory: {{ .Values.resources.memory | quote }}
           limits:
-            cpu: {{ .Values.container.resources.cpuMax | quote }}
-            memory: {{ .Values.container.resources.memory | quote }}
+            cpu: {{ .Values.resources.cpuMax | quote }}
+            memory: {{ .Values.resources.memory | quote }}
         ports:
-          - containerPort: {{ .Values.container.port }}
+          - containerPort: {{ .Values.containerPort }}
 
         # Configuration and secrets
         env:

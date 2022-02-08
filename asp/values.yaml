@@ -2,8 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# HA and autoscaling
-replicaCount: 1
+# Basic details
 appName: asp
 
 # Image
@@ -12,13 +11,21 @@ image:
   tag: ""
   pullPolicy: IfNotPresent
 
-# Container port
-container:
-  port: 8080
-  resources:
-    cpuBase: 100m
-    cpuMax: 1000m
-    memory: 1000Mi
+containerPort: 8080
+
+# Server resources
+resources:
+  cpuBase: 100m
+  cpuMax: 1000m
+  memory: 1000Mi
+
+# Replicas and autoscaling (Autoscaling overrides replica count)
+replicaCount: 1
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
 
 # Environment variables
 environmentVars:
@@ -67,10 +74,3 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 50
-  targetCPUUtilizationPercentage: 70
-  # targetMemoryUtilizationPercentage: 80
