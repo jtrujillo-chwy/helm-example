@@ -27,6 +27,8 @@ spec:
             memory: {{ .Values.container.resources.memory | quote }}
         ports:
           - containerPort: {{ .Values.container.port }}
+
+        # Configuration and secrets
         env:
           {{- range .Values.environmentVars }}
           - name: {{ .name }}
@@ -39,16 +41,36 @@ spec:
                 name: {{ .secretRef }}
                 key: {{ .fieldName }}
           {{- end }}
+        {{- if gt (len .Values.mountedSecrets.secrets) 0 }}
+        volumeMounts:
+          {{- range .Values.mountedSecrets.secrets }}
+          - name: {{ .name }}
+            mountPath: {{ $.Values.mountedSecrets.mountPath }}
+            readOnly: true
+          {{- end }}
+        {{- end }}
+        # Health checks
         readinessProbe:
           httpGet:
             path: {{ .Values.healthCheck.path | quote }}
             port: {{ .Values.healthCheck.port }}
           initialDelaySeconds: {{ .Values.healthCheck.readinessDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
-
         livenessProbe:
           httpGet:
             path: {{ .Values.healthCheck.path | quote }}
             port: {{ .Values.healthCheck.port }}
           initialDelaySeconds: {{ .Values.healthCheck.livenessDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+
+      {{- if gt (len .Values.mountedSecrets.secrets) 0 }}
+      volumes:
+        {{- range .Values.mountedSecrets.secrets }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretRef }}
+            items:
+              - key: {{ .fieldName }}
+                path: {{ .path }}
+        {{- end }}
+      {{- end }}

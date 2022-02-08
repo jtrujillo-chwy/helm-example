@@ -42,6 +42,14 @@ secrets:
     secretRef: asp-mongodb-creds
     fieldName: uri
 
+mountedSecrets:
+  mountPath: /secrets
+  secrets:
+    - name: kafka-cert
+      secretRef: asp-kafka-cert-secret
+      fieldName: certificate
+      path: kafka-cert.pem
+
 healthCheck:
   path: /audiences/v1/health
   port: 8080
