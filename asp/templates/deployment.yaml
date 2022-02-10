@@ -32,7 +32,7 @@ spec:
         env:
           {{- range .Values.environmentVars }}
           - name: {{ .name }}
-            value: {{ .value }}
+            value: {{ .value | quote }}
           {{- end }}
           {{- range .Values.secrets }}
           - name: {{ .name }}
@@ -45,7 +45,7 @@ spec:
         volumeMounts:
           {{- range .Values.mountedSecrets.secrets }}
           - name: {{ .name }}
-            mountPath: {{ $.Values.mountedSecrets.mountPath }}
+            mountPath: {{ default "/secrets" $.Values.mountedSecrets.mountPath }}
             readOnly: true
           {{- end }}
         {{- end }}
@@ -56,12 +56,14 @@ spec:
             port: {{ .Values.healthCheck.port }}
           initialDelaySeconds: {{ .Values.healthCheck.readinessDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
         livenessProbe:
           httpGet:
             path: {{ .Values.healthCheck.path | quote }}
             port: {{ .Values.healthCheck.port }}
           initialDelaySeconds: {{ .Values.healthCheck.livenessDelaySeconds }}
           periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
 
       {{- if gt (len .Values.mountedSecrets.secrets) 0 }}
       volumes:

@@ -4,14 +4,13 @@
 
 # Basic details
 appName: asp
+containerPort: 8080
 
-# Image
+# Image details, like repo. Default tag is the Chart.AppVersion
 image:
   repository: local-registry:5000/audience-segmentation-platform
   tag: ""
   pullPolicy: IfNotPresent
-
-containerPort: 8080
 
 # Server resources
 resources:
@@ -33,14 +32,18 @@ environmentVars:
     value: "/audiences/v1/"
   - name: "kafka.consumer.topics.customer_segments.bootstrap-servers"
     value: "kafka:9092"
+  - name: "kafka.consumer.topics.customer_segments.group-id"
+    value: "com.chewy.asp-v2"
   - name: "kafka.consumer.topics.internal_audiences.bootstrap-servers"
     value: "kafka:9092"
+  - name: "kafka.producer.enabled"
+    value: "true"
   - name: "kafka.producer.topics.audiences.bootstrap-servers"
     value: "kafka:9092"
   - name: "kafka.producer.topics.members.bootstrap-servers"
     value: "kafka:9092"
 
-# Secrets
+# Secrets that are injected as environment vars
 secrets:
   - name: spring.data.mongodb.primary.uri
     secretRef: asp-mongodb-creds
@@ -49,6 +52,7 @@ secrets:
     secretRef: asp-mongodb-creds
     fieldName: uri
 
+# Secrets injected as mounted files
 mountedSecrets:
   mountPath: /secrets
   secrets:
@@ -57,20 +61,21 @@ mountedSecrets:
       fieldName: certificate
       path: kafka-cert.pem
 
+# Healtcheck and readiness check details. Port and path must match app details.
 healthCheck:
   path: /audiences/v1/health
   port: 8080
   readinessDelaySeconds: 30
   livenessDelaySeconds: 120
   periodSeconds: 10
+  timeoutSeconds: 5
 
+# Service config
 service:
   type: ClusterIP # ClusterIP, NodePort, LoadBalancer
   port: 8080
   nodePort: 30007
 
+# Ingress config, path must match your context path
 ingress:
   path: /audiences/v1/
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
