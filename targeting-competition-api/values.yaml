@@ -1,0 +1,68 @@
+# Default values for asp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# HA and autoscaling
+replicaCount: 1
+appName: targeting-competition-api
+
+# Image
+image:
+  repository: local-registry:5000/targeting-competition-api
+  tag: ""
+  pullPolicy: Always
+
+# Container port
+container:
+  port: 8080
+  resources:
+    cpuBase: 100m
+    cpuMax: 1000m
+    memory: 1000Mi
+
+# Environment variables
+environmentVars:
+  - name: server.servlet.context-path
+    value: "/placements/v1/"
+  - name: targeting-competition-api.jobs.enabled
+    value: "true"
+  - name: "kafka.consumer.topics.members.bootstrap-servers"
+    value: "kafka:9092"
+
+# Secrets
+secrets:
+  - name: spring.data.mongodb.primary.uri
+    secretRef: competition-mongodb-creds
+    fieldName: uri
+  - name: spring.data.mongodb.secondary.uri
+    secretRef: competition-mongodb-creds
+    fieldName: uri
+
+mountedSecrets:
+  mountPath: /secrets
+  secrets: []
+
+healthCheck:
+  path: /placements/v1/health
+  port: 8080
+  readinessDelaySeconds: 30
+  livenessDelaySeconds: 120
+  periodSeconds: 10
+
+service:
+  type: ClusterIP # ClusterIP, NodePort, LoadBalancer
+  port: 8080
+  nodePort: 30007
+
+ingress:
+  path: /placements/v1/
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  # targetMemoryUtilizationPercentage: 80

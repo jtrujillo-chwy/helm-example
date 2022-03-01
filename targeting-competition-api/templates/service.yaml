@@ -9,5 +9,5 @@ spec:
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: {{ .Values.containerPort }}
-      {{ if hasKey .Values.service "nodePort" }}nodePort: {{ .Values.service.nodePort }}{{ end }}
+      targetPort: {{ .Values.container.port }}
+      {{ if eq .Values.service.type "NodePort" }}nodePort: {{ .Values.service.nodePort }}{{ end }}

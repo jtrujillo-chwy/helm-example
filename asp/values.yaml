@@ -8,15 +8,16 @@ containerPort: 8080
 
 # Image details, like repo. Default tag is the Chart.AppVersion
 image:
-  repository: local-registry:5000/audience-segmentation-platform
-  tag: ""
+  #repository: local-registry:5000/audience-segmentation-platform
+  repository: 278833423079.dkr.ecr.us-east-1.amazonaws.com/demm/audience-segmentation-platform
+  tag: "0.14.0"
   pullPolicy: IfNotPresent
 
 # Server resources
 resources:
   cpuBase: 100m
   cpuMax: 1000m
-  memory: 1000Mi
+  memory: 500Mi
 
 # Replicas and autoscaling (Autoscaling overrides replica count)
 replicaCount: 1
@@ -30,6 +31,8 @@ autoscaling:
 environmentVars:
   - name: server.servlet.context-path
     value: "/audiences/v1/"
+  - name: asp.jobs.update-modified-members.interval-minutes
+    value: 2
   - name: "kafka.consumer.topics.customer_segments.bootstrap-servers"
     value: "kafka:9092"
   - name: "kafka.consumer.topics.customer_segments.group-id"
@@ -72,10 +75,16 @@ healthCheck:
 
 # Service config
 service:
-  type: ClusterIP # ClusterIP, NodePort, LoadBalancer
+  #type: ClusterIP # ClusterIP, NodePort, LoadBalancer
+  type: NodePort # ClusterIP, NodePort, LoadBalancer
   port: 8080
-  nodePort: 30007
+  #nodePort: 30974
 
 # Ingress config, path must match your context path
 ingress:
   path: /audiences/v1/
+  isLocal: false
+  subnets:
+    - subnet-0911ef57e04bf2644
+    - subnet-0bc48dff5d03654e4
+    - subnet-09c4a90eb4d7654fc

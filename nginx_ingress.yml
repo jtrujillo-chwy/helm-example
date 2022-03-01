@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: competition-services
+  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+#    alb.ingress.kubernetes.io/scheme: internet-facing
+#    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/subnets: subnet-0e01d68737acf10d0, subnet-0c08d4678aa0963e5, subnet-0b5e0083bf7e481c9
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /nginx
+        pathType: Prefix
+        backend:
+          service:
+            name: audience-segmentation-service
+            port:
+              number: 80

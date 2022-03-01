@@ -4,15 +4,7 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}-ingress
   annotations:
-    {{- if eq .Values.ingress.isLocal true }}
     ingress.kubernetes.io/ssl-redirect: "false"
-    {{- else }}
-    kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/scheme: internal
-    alb.ingress.kubernetes.io/subnets: {{ join "," .Values.ingress.subnets }}
-    alb.ingress.kubernetes.io/backend-protocol: HTTP
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
-    {{- end }}
 spec:
   rules:
   - http:
